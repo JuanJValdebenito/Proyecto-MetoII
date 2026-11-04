@@ -1,11 +1,13 @@
 # Rat in a Maze
-**Asignatura:** Metodología de la Investigación II (22636)  
+
+**Asignatura:** Metodología de la Investigación II (22636)
 **Profesor:** Rubén Carvajal Schiaffino
-**Universidad:** Universidad de Santiago de Chile 
+**Universidad:** Universidad de Santiago de Chile
 
 ---
 
 ## Autores
+
 * **Maximiliano Correa V.**
 * **Juan Valdebenito S.**
 
@@ -19,17 +21,3 @@ El directorio contiene los siguientes archivos del proyecto:
 * **`README.md`**: Este archivo con las instrucciones de compilación, ejecución y descripción general del proyecto.
 
 ---
-
-## Compilación y Ejecución
-
-### 1. Compilación del Código Fuente (C)
-Para compilar el programa `rat_in_a_maze.c` utilizando `gcc`.
-
-```bash
-gcc -o rat_in_a_maze rat_in_a_maze.c
-
-### 2. Ejecución del Programa
-Para ejecutar el binario `rat_in_a_maze`.
-
-```bash
-./rat_in_a_maze
