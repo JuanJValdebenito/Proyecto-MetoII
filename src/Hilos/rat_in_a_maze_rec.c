@@ -1,92 +1,161 @@
-/*******************************************************************************
-*
-* rat_in_a_maze.c: Solucion para Rat in a Maze.
-* Autores: Maximiliano Correa, Juan Valdebenito         
-*
-*******************************************************************************/
+
+/***************************************************************
+ *
+ * rat_in_a_maze.c: Solucion recursiva para Rat in a Maze.
+ * Autores: Maximiliano Correa, Juan Valdebenito
+ *
+ ***************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_PATH 1500
+int IsValid(int row, int col, int n, int maze[],
+            int visited[])
+{
+    int pos;
 
-int IsValid(int r, int c, int n, unsigned char **maze) {
-    if (r >= 0 && c >= 0 && r < n && c < n) {
-        if (maze[r][c] == 1) {
+    if (row < 0 || row >= n || col < 0 || col >= n)
+    {
+        return 0;
+    }
+
+    pos = row * n + col;
+
+    if (maze[pos] == 0 || visited[pos] == 1)
+    {
+        return 0;
+    }
+
+    return 1;
+}
+
+void FindPaths(int row, int col, int n, int maze[],
+               int visited[], char path[], int path_length,
+               int *solution_count, int row_change[],
+               int col_change[], char moves[])
+{
+    int direction;
+    int next_row;
+    int next_col;
+    int next_pos;
+
+    if (row == n - 1 && col == n - 1)
+    {
+        path[path_length] = '\0';
+
+        printf("%s\n", path);
+
+        *solution_count = *solution_count + 1;
+
+        return;
+    }
+
+    for (direction = 0; direction < 4;
+         direction = direction + 1)
+    {
+        next_row = row + row_change[direction];
+        next_col = col + col_change[direction];
+
+        if (IsValid(next_row, next_col, n, maze, visited))
+        {
+            next_pos = next_row * n + next_col;
+
+            visited[next_pos] = 1;
+            path[path_length] = moves[direction];
+
+            FindPaths(next_row, next_col, n, maze,
+                      visited, path, path_length + 1,
+                      solution_count, row_change,
+                      col_change, moves);
+
+            visited[next_pos] = 0;
+        }
+    }
+}
+
+int main(void)
+{
+    int n;
+    int total;
+    int i;
+    int solution_count;
+    int *maze;
+    int *visited;
+    char *path;
+    int row_change[4] = {1, 0, 0, -1};
+    int col_change[4] = {0, -1, 1, 0};
+    char moves[4] = {'D', 'L', 'R', 'U'};
+
+    if (scanf("%d", &n) != 1)
+    {
+        printf("Error: invalid input.\n");
+        return 1;
+    }
+
+    if (n <= 0 || n > 100)
+    {
+        printf("Error: invalid maze size.\n");
+        return 1;
+    }
+
+    total = n * n;
+
+    maze = calloc(total, sizeof(int));
+    visited = calloc(total, sizeof(int));
+    path = calloc(total + 1, sizeof(char));
+
+    if (maze == NULL || visited == NULL || path == NULL)
+    {
+        printf("Error: memory allocation failed.\n");
+
+        free(maze);
+        free(visited);
+        free(path);
+
+        return 1;
+    }
+
+    for (i = 0; i < total; i = i + 1)
+    {
+        if (scanf("%d", &maze[i]) != 1)
+        {
+            printf("Error: invalid maze data.\n");
+
+            free(maze);
+            free(visited);
+            free(path);
+
+            return 1;
+        }
+
+        if (maze[i] != 0 && maze[i] != 1)
+        {
+            printf("Error: maze values must be 0 or 1.\n");
+
+            free(maze);
+            free(visited);
+            free(path);
+
             return 1;
         }
     }
+
+    solution_count = 0;
+
+    if (maze[0] == 1 && maze[total - 1] == 1)
+    {
+        visited[0] = 1;
+
+        FindPaths(0, 0, n, maze, visited, path, 0,
+                  &solution_count, row_change,
+                  col_change, moves);
+    }
+
+    printf("Total paths: %d\n", solution_count);
+
+    free(maze);
+    free(visited);
+    free(path);
+
     return 0;
 }
-
-void FindPath(int r, int c, int n, unsigned char **maze, char *path, int pathLen) {
-    int i, nr, nc;
-    int dr[4] = {1, 0, 0, -1};
-    int dc[4] = {0, -1, 1, 0};
-    char dir[4] = {'D', 'L', 'R', 'U'};
-
-    if (r == n - 1 && c == n - 1) {
-        path[pathLen] = '\0';
-        printf("%s\n", path);
-        return;
-    }
-
-    maze[r][c] = 0;
-
-    for (i = 0; i < 4; i = i + 1) {
-        nr = r + dr[i];
-        nc = c + dc[i];
-
-        if (IsValid(nr, nc, n, maze) == 1) {
-            path[pathLen] = dir[i];
-            FindPath(nr, nc, n, maze, path, pathLen + 1);
-        }
-    }
-
-    maze[r][c] = 1;
-}
-
-void main(int argc, char *argv[]) {
-    int n, i, j, val;
-    unsigned char **maze;
-    char path[MAX_PATH];
-    FILE *file;
-
-    if (argc < 2) {
-        printf("Uso: %s <archivo_laberinto.txt>\n", argv[0]);
-        return;
-    }
-
-    file = fopen(argv[1], "r");
-    if (file == NULL) {
-        printf("Error: No se pudo abrir el archivo %s\n", argv[1]);
-        return;
-    }
-
-    fscanf(file, "%d", &n);
-
-    maze = (unsigned char **)calloc(n, sizeof(unsigned char *));
-    for (i = 0; i < n; i = i + 1) {
-        maze[i] = (unsigned char *)calloc(n, sizeof(unsigned char));
-    }
-
-    for (i = 0; i < n; i = i + 1) {
-        for (j = 0; j < n; j = j + 1) {
-            fscanf(file, "%d", &val);
-            maze[i][j] = (unsigned char)val;
-        }
-    }
-
-    fclose(file);
-
-    printf("Caminos encontrados para salir del laberinto (%dx%d):\n\n", n, n);
-
-    if (maze[0][0] == 1 && maze[n - 1][n - 1] == 1) {
-        FindPath(0, 0, n, maze, path, 0);
-    }
-
-    for (i = 0; i < n; i = i + 1) {
-        free(maze[i]);
-    }
-    free(maze);
-}
-
